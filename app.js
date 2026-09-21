@@ -217,6 +217,106 @@ function renderStyleFilters() {
   });
 }
 
+function collectionShareUrl(id) {
+  const base = window.location.href.split("?")[0].split("#")[0];
+  return `${base}?koleksi=${encodeURIComponent(id)}#koleksi`;
+}
+
+function collectionShareText(item) {
+  return [
+    `Kitchen set ${item.name} — ${item.style}`,
+    `${item.finish} · mulai ${formatRupiah(item.pricePerMeter)}/meter`,
+    item.blurb,
+    "",
+    "Mica Interior Project",
+    collectionShareUrl(item.id),
+  ].join("\n");
+}
+
+async function shareCollection(id) {
+  const item = getCollection(id);
+  const url = collectionShareUrl(id);
+  const text = collectionShareText(item);
+  const title = `Mica Interior — ${item.name}`;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text, url });
+      return;
+    } catch (err) {
+      if (err && err.name === "AbortError") return;
+    }
+  }
+
+  const menu = document.querySelector(`[data-share-menu="${id}"]`);
+  if (menu) {
+    const open = menu.hidden;
+    document.querySelectorAll("[data-share-menu]").forEach((m) => {
+      m.hidden = true;
+    });
+    menu.hidden = !open;
+  }
+}
+
+function bindShareMenus(root) {
+  root.querySelectorAll("[data-share]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      shareCollection(btn.dataset.share);
+    });
+  });
+
+  root.querySelectorAll("[data-share-wa]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const item = getCollection(btn.dataset.shareWa);
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(collectionShareText(item))}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
+  });
+
+  root.querySelectorAll("[data-share-fb]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const url = collectionShareUrl(btn.dataset.shareFb);
+      window.open(
+        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
+  });
+
+  root.querySelectorAll("[data-share-x]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const item = getCollection(btn.dataset.shareX);
+      const url = collectionShareUrl(item.id);
+      const text = `Kitchen set ${item.name} (${item.style}) — mulai ${formatRupiah(item.pricePerMeter)}/m · Mica Interior`;
+      window.open(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
+  });
+
+  root.querySelectorAll("[data-share-copy]").forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const item = getCollection(btn.dataset.shareCopy);
+      const ok = await copyText(collectionShareText(item));
+      btn.textContent = ok ? "Tersalin" : "Gagal salin";
+      setTimeout(() => {
+        btn.textContent = "Salin teks";
+      }, 1500);
+    });
+  });
+}
+
 function renderCollections() {
   const el = document.getElementById("collection-grid");
   const items = COLLECTIONS.filter(
@@ -231,6 +331,15 @@ function renderCollections() {
           <div class="card-photo">
             <img src="${item.image}" alt="${item.alt}" loading="lazy" />
             <span class="card-badge">${item.style}</span>
+            <button type="button" class="card-share" data-share="${item.id}" aria-label="Bagikan ${item.name}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51 15.42 17.49"/><path d="m15.41 6.51-6.82 3.98"/></svg>
+            </button>
+            <div class="share-menu" data-share-menu="${item.id}" hidden>
+              <button type="button" data-share-wa="${item.id}">WhatsApp</button>
+              <button type="button" data-share-fb="${item.id}">Facebook</button>
+              <button type="button" data-share-x="${item.id}">X / Twitter</button>
+              <button type="button" data-share-copy="${item.id}">Salin teks</button>
+            </div>
           </div>
           <div class="card-body">
             <div class="card-top">
@@ -244,9 +353,14 @@ function renderCollections() {
               </p>
             </div>
             <p class="card-blurb">${item.blurb}</p>
-            <button type="button" class="btn ${active ? "btn-primary" : "btn-outline"}" data-select="${item.id}">
-              ${active ? "Dipilih · lanjut pesan" : "Pesan koleksi ini"}
-            </button>
+            <div class="card-actions">
+              <button type="button" class="btn ${active ? "btn-primary" : "btn-outline"}" data-select="${item.id}">
+                ${active ? "Dipilih · lanjut pesan" : "Pesan koleksi ini"}
+              </button>
+              <button type="button" class="btn btn-outline" data-share="${item.id}">
+                Bagikan
+              </button>
+            </div>
           </div>
         </article>
       `;
@@ -262,6 +376,8 @@ function renderCollections() {
       scrollToOrder();
     });
   });
+
+  bindShareMenus(el);
 }
 
 function renderSelect() {
@@ -439,6 +555,18 @@ function initForm() {
 }
 
 /* —— Boot —— */
+(function applyCollectionFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("koleksi");
+    if (id && COLLECTIONS.some((c) => c.id === id)) {
+      state.collectionId = id;
+    }
+  } catch (_) {
+    /* ignore */
+  }
+})();
+
 renderStyleFilters();
 renderCollections();
 renderSelect();
@@ -447,3 +575,11 @@ initLengthControls();
 initForm();
 updateLengthDisplay();
 updateSummary();
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("[data-share-menu]") && !e.target.closest("[data-share]")) {
+    document.querySelectorAll("[data-share-menu]").forEach((m) => {
+      m.hidden = true;
+    });
+  }
+});

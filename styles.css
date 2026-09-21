@@ -480,6 +480,66 @@ button:disabled {
   background: rgba(251, 248, 242, 0.95);
   font-size: 0.75rem;
   font-weight: 500;
+  z-index: 2;
+}
+
+.card-share {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(251, 248, 242, 0.95);
+  color: var(--fg);
+  box-shadow: 0 1px 4px rgba(28, 23, 18, 0.12);
+  transition: background var(--motion-quick), transform var(--motion-quick);
+}
+
+.card-share:hover {
+  background: var(--bg);
+  transform: scale(1.05);
+}
+
+.share-menu {
+  position: absolute;
+  top: 3.4rem;
+  right: 0.75rem;
+  z-index: 3;
+  display: grid;
+  gap: 0.25rem;
+  min-width: 9.5rem;
+  padding: 0.4rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--elevated);
+  box-shadow: 0 8px 24px rgba(28, 23, 18, 0.12);
+}
+
+.share-menu[hidden] {
+  display: none !important;
+}
+
+.share-menu button {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--fg);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.share-menu button:hover {
+  background: var(--surface);
 }
 
 .card-body {
@@ -488,6 +548,17 @@ button:disabled {
   gap: 1rem;
   padding: 1.25rem;
   flex: 1;
+}
+
+.card-actions {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.card-actions .btn {
+  width: 100%;
+  margin-top: 0;
 }
 
 .card-top {
@@ -526,11 +597,6 @@ button:disabled {
   font-size: 0.875rem;
   line-height: 1.6;
   color: var(--muted);
-}
-
-.card .btn {
-  margin-top: auto;
-  width: 100%;
 }
 
 /* Process */
