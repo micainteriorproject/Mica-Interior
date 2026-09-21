@@ -483,6 +483,20 @@ button:disabled {
   z-index: 2;
 }
 
+.card-badge-promo {
+  top: 2.65rem;
+  background: var(--primary);
+  color: var(--primary-fg);
+}
+
+.price-was {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
 .card-share {
   position: absolute;
   top: 0.75rem;

@@ -6,9 +6,12 @@ const COLLECTIONS = [
     name: "Sora",
     style: "Japandi",
     finish: "Blockboard · HPL",
-    pricePerMeter: 1600000,
+    // HPP est. ~Rp1,30 jt → normal 27%, promo 20%
+    priceNormal: 1790000,
+    pricePerMeter: 1630000,
+    promo: true,
     leadWeeks: "3–4 minggu",
-    blurb: "Paket ekonomis: blockboard + HPL. Oak hangat, rak terbuka. Cocok budget terkontrol.",
+    blurb: "Paket ekonomis: blockboard + HPL. Oak hangat, rak terbuka. Harga promo terbatas.",
     image: "kitchens/sora.jpg",
     alt: "Kitchen set Sora bergaya japandi dengan kabinet oak dan rak keramik",
   },
@@ -17,7 +20,9 @@ const COLLECTIONS = [
     name: "Lumen",
     style: "Modern",
     finish: "PVC · HPL",
-    pricePerMeter: 3700000,
+    // HPP est. ~Rp2,70 jt → margin ~29%
+    pricePerMeter: 3800000,
+    promo: false,
     leadWeeks: "5–6 minggu",
     blurb: "PVC anti-rayap + HPL. Slab putih handleless, profil tipis. Tahan lembap dapur.",
     image: "kitchens/lumen.jpg",
@@ -28,9 +33,12 @@ const COLLECTIONS = [
     name: "Arka",
     style: "Industrial",
     finish: "Multiplek · HPL",
-    pricePerMeter: 1800000,
+    // HPP est. ~Rp1,45 jt → normal 27%, promo 20%
+    priceNormal: 1990000,
+    pricePerMeter: 1810000,
+    promo: true,
     leadWeeks: "4–5 minggu",
-    blurb: "Paket standar: multiplek + HPL. Walnut asap, tegas dan tahan lama.",
+    blurb: "Paket standar: multiplek + HPL. Walnut asap, tegas dan tahan lama. Harga promo terbatas.",
     image: "kitchens/arka.jpg",
     alt: "Kitchen set Arka walnut gelap dengan granit hitam dan lampu gantung industrial",
   },
@@ -39,7 +47,9 @@ const COLLECTIONS = [
     name: "Mira",
     style: "Klasik",
     finish: "Duco",
-    pricePerMeter: 2800000,
+    // HPP est. ~Rp2,20 jt → margin ~29%
+    pricePerMeter: 3100000,
+    promo: false,
     leadWeeks: "5–6 minggu",
     blurb: "Paket premium duco. Shaker krem, island kayu. Finishing mulus tanpa sambungan HPL.",
     image: "kitchens/mira.jpg",
@@ -50,7 +60,9 @@ const COLLECTIONS = [
     name: "Sage",
     style: "Tropis",
     finish: "Duco",
-    pricePerMeter: 3000000,
+    // HPP est. ~Rp2,25 jt → margin ~29%
+    pricePerMeter: 3150000,
+    promo: false,
     leadWeeks: "5–6 minggu",
     blurb: "Premium duco hijau sage matte. Cocok rumah yang banyak cahaya.",
     image: "kitchens/sage.jpg",
@@ -61,7 +73,9 @@ const COLLECTIONS = [
     name: "Batu",
     style: "Modern",
     finish: "Multiplek · HPL+",
-    pricePerMeter: 2000000,
+    // HPP est. ~Rp1,60 jt → margin ~29%
+    pricePerMeter: 2250000,
+    promo: false,
     leadWeeks: "4–5 minggu",
     blurb: "Paket menengah: multiplek + HPL lebih baik. Abu batu, quiet luxury untuk dapur compact.",
     image: "kitchens/batu.jpg",
@@ -225,7 +239,9 @@ function collectionShareUrl(id) {
 function collectionShareText(item) {
   return [
     `Kitchen set ${item.name} — ${item.style}`,
-    `${item.finish} · mulai ${formatRupiah(item.pricePerMeter)}/meter`,
+    item.promo && item.priceNormal
+      ? `${item.finish} · promo ${formatRupiah(item.pricePerMeter)}/meter (normal ${formatRupiah(item.priceNormal)})`
+      : `${item.finish} · mulai ${formatRupiah(item.pricePerMeter)}/meter`,
     item.blurb,
     "",
     "Mica Interior Project",
@@ -331,6 +347,7 @@ function renderCollections() {
           <div class="card-photo">
             <img src="${item.image}" alt="${item.alt}" loading="lazy" />
             <span class="card-badge">${item.style}</span>
+            ${item.promo ? `<span class="card-badge card-badge-promo">Promo</span>` : ""}
             <button type="button" class="card-share" data-share="${item.id}" aria-label="Bagikan ${item.name}">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51 15.42 17.49"/><path d="m15.41 6.51-6.82 3.98"/></svg>
             </button>
@@ -348,8 +365,13 @@ function renderCollections() {
                 <p class="card-meta">${item.finish} · ${item.leadWeeks}</p>
               </div>
               <p class="card-price">
+                ${
+                  item.promo && item.priceNormal
+                    ? `<span class="price-was">${formatRupiah(item.priceNormal)}</span>`
+                    : ""
+                }
                 ${formatRupiah(item.pricePerMeter)}
-                <span>/ meter</span>
+                <span>/ meter${item.promo ? " · promo" : ""}</span>
               </p>
             </div>
             <p class="card-blurb">${item.blurb}</p>
@@ -384,7 +406,7 @@ function renderSelect() {
   const sel = document.getElementById("koleksi-select");
   sel.innerHTML = COLLECTIONS.map(
     (c) =>
-      `<option value="${c.id}">${c.name} · ${c.style} · ${formatRupiah(c.pricePerMeter)}/m</option>`
+      `<option value="${c.id}">${c.name} · ${c.style} · ${formatRupiah(c.pricePerMeter)}/m${c.promo ? " (promo)" : ""}</option>`
   ).join("");
   sel.value = state.collectionId;
   sel.addEventListener("change", () => {
