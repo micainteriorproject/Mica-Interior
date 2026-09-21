@@ -83,6 +83,12 @@ const MIN_LENGTH = 1.5;
 const MAX_LENGTH = 12;
 const STEP = 0.5;
 
+const WHATSAPP_NUMBER = "6285122674950";
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
+const INSTAGRAM_HANDLE = "micainteriorproject";
+const INSTAGRAM_URL = `https://www.instagram.com/${INSTAGRAM_HANDLE}/`;
+const INSTAGRAM_DM_URL = `https://ig.me/m/${INSTAGRAM_HANDLE}`;
+
 const state = {
   style: "Semua",
   collectionId: COLLECTIONS[0].id,
@@ -148,6 +154,10 @@ function buildOrderMessage() {
     "",
     "Mohon info ketersediaan survey dan jadwal pengerjaan.",
   ].join("\n");
+}
+
+function whatsappOrderUrl(message) {
+  return `${WHATSAPP_URL}?text=${encodeURIComponent(message)}`;
 }
 
 async function copyText(value) {
@@ -345,6 +355,57 @@ function initLengthControls() {
   });
 }
 
+function validateOrderForm() {
+  const errorNama = document.getElementById("error-nama");
+  const errorKota = document.getElementById("error-kota");
+  const inputNama = document.getElementById("nama");
+  const inputKota = document.getElementById("kota");
+  let ok = true;
+
+  if (state.name.trim().length < 2) {
+    errorNama.textContent = "Isi nama lengkap.";
+    errorNama.hidden = false;
+    inputNama.setAttribute("aria-invalid", "true");
+    ok = false;
+  } else {
+    errorNama.hidden = true;
+    inputNama.removeAttribute("aria-invalid");
+  }
+
+  if (state.city.trim().length < 2) {
+    errorKota.textContent = "Isi kota atau area.";
+    errorKota.hidden = false;
+    inputKota.setAttribute("aria-invalid", "true");
+    ok = false;
+  } else {
+    errorKota.hidden = true;
+    inputKota.removeAttribute("aria-invalid");
+  }
+
+  return ok;
+}
+
+async function handleOrder(channel) {
+  if (!validateOrderForm()) return;
+
+  const message = buildOrderMessage();
+  const copied = await copyText(message);
+  state.draft = message;
+  state.copied = copied;
+  updateSummary();
+
+  const btnWa = document.getElementById("btn-wa");
+  const btnIg = document.getElementById("btn-dm");
+  if (btnWa) btnWa.href = whatsappOrderUrl(message);
+  if (btnIg) btnIg.href = INSTAGRAM_DM_URL;
+
+  if (channel === "whatsapp") {
+    window.open(whatsappOrderUrl(message), "_blank", "noopener,noreferrer");
+  } else if (channel === "instagram") {
+    window.open(INSTAGRAM_DM_URL, "_blank", "noopener,noreferrer");
+  }
+}
+
 function initForm() {
   document.getElementById("nama").addEventListener("input", (e) => {
     state.name = e.target.value;
@@ -356,45 +417,21 @@ function initForm() {
     state.notes = e.target.value;
   });
 
-  document.getElementById("order-form").addEventListener("submit", async (e) => {
+  document.getElementById("order-form").addEventListener("submit", (e) => {
     e.preventDefault();
-
-    const errorNama = document.getElementById("error-nama");
-    const errorKota = document.getElementById("error-kota");
-    const inputNama = document.getElementById("nama");
-    const inputKota = document.getElementById("kota");
-    let ok = true;
-
-    if (state.name.trim().length < 2) {
-      errorNama.textContent = "Isi nama lengkap.";
-      errorNama.hidden = false;
-      inputNama.setAttribute("aria-invalid", "true");
-      ok = false;
-    } else {
-      errorNama.hidden = true;
-      inputNama.removeAttribute("aria-invalid");
-    }
-
-    if (state.city.trim().length < 2) {
-      errorKota.textContent = "Isi kota atau area.";
-      errorKota.hidden = false;
-      inputKota.setAttribute("aria-invalid", "true");
-      ok = false;
-    } else {
-      errorKota.hidden = true;
-      inputKota.removeAttribute("aria-invalid");
-    }
-
-    if (!ok) return;
-
-    const message = buildOrderMessage();
-    const copied = await copyText(message);
-    state.draft = message;
-    state.copied = copied;
-    updateSummary();
   });
 
-  document.getElementById("btn-recopy").addEventListener("click", async () => {
+  document.getElementById("btn-order-wa")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    handleOrder("whatsapp");
+  });
+
+  document.getElementById("btn-order-ig")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    handleOrder("instagram");
+  });
+
+  document.getElementById("btn-recopy")?.addEventListener("click", async () => {
     if (!state.draft) return;
     state.copied = await copyText(state.draft);
     updateSummary();

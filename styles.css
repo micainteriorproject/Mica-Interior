@@ -845,6 +845,23 @@ button:disabled {
   margin-top: 0.75rem;
 }
 
+.order-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .footer-links {
+    align-items: flex-end;
+  }
+}
+
 /* Footer */
 .site-footer {
   border-top: 1px solid var(--border);
