@@ -6,9 +6,9 @@ const COLLECTIONS = [
     name: "Sora",
     style: "Japandi",
     finish: "Blockboard · HPL",
-    // HPP est. ~Rp1,30 jt → normal 27%, promo 20%
+    // Harga normal Rp1.790.000 · promo Rp1.690.000
     priceNormal: 1790000,
-    pricePerMeter: 1630000,
+    pricePerMeter: 1690000,
     promo: true,
     leadWeeks: "3–4 minggu",
     blurb: "Paket ekonomis: blockboard + HPL. Oak hangat, rak terbuka. Harga promo terbatas.",
